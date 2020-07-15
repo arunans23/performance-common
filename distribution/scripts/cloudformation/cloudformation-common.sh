@@ -395,39 +395,39 @@ region_names[eu_west_3]="EU (Paris)"
 region_names[eu_north_1]="EU (Stockholm)"
 region_names[sa_east_1]="South America (Sao Paulo)"
 
-# Estimate AWS EC2 cost
-echo "Getting the AWS EC2 Pricing for given instance types..."
-total_cost="0"
-while read count ec2_instance_type; do
-    pricing_json="$results_dir/pricing.json"
-    price_in_usd=""
-    total_hours=""
-    region_name="${aws_region//-/_}"
-    if aws pricing get-products --filters \
-        Type=TERM_MATCH,Field=ServiceCode,Value=AmazonEC2 \
-        Type=TERM_MATCH,Field=InstanceType,Value=$ec2_instance_type \
-        Type=TERM_MATCH,Field=operatingSystem,Value=Linux \
-        Type=TERM_MATCH,Field=tenancy,Value=Shared \
-        Type=TERM_MATCH,Field=capacitystatus,Value=Used \
-        Type=TERM_MATCH,Field=preInstalledSw,Value=NA \
-        "Type=TERM_MATCH,Field=location,Value=${region_names[$region_name]}" \
-        --format-version aws_v1 --max-results 1 \
-        --service-code AmazonEC2 --output json >$pricing_json; then
-        price_in_usd="$(jq -r '.PriceList[] | fromjson.terms.OnDemand[].priceDimensions[].pricePerUnit.USD' $pricing_json || echo "")"
-        total_duration="$(jq -r '.total_duration' $results_dir/test-duration.json || echo "")"
-        total_hours="$(bc <<<"scale=4;hrs=$total_duration/60;scale=0;if (hrs % 60) hrs/60+1 else hrs/60" || echo "")"
-    fi
-    if [[ -n $price_in_usd ]] && [[ -n $total_hours ]]; then
-        cost="$(bc <<<"scale=4;$count*$price_in_usd*$total_hours" | awk '{printf "%.4f\n", $0}')"
-        total_cost="$(bc <<<"$total_cost+$cost" | awk '{printf "%.4f\n", $0}' || echo "0")"
-        printf "Cost to run %s instance(s) from instance type %10s is USD %s.\n" "$count" "$ec2_instance_type" "$cost"
-    else
-        printf "WARNING: Could not calculate the cost to run %10s instance(s) from instance type %s.\n" "$count" "$ec2_instance_type"
-    fi
-done < <(jq -r '. as $type | keys_unsorted[] | select(endswith("ec2_instance_type")) | $type[.]' $results_dir/cf-test-metadata.json | sort | uniq -c | sort -nr)
-if [[ $(bc <<<"scale=4;$total_cost > 0") -eq 1 ]]; then
-    printf "\nTotal cost is USD %s.\n\n" "$total_cost"
-fi
+# # Estimate AWS EC2 cost
+# echo "Getting the AWS EC2 Pricing for given instance types..."
+# total_cost="0"
+# while read count ec2_instance_type; do
+#     pricing_json="$results_dir/pricing.json"
+#     price_in_usd=""
+#     total_hours=""
+#     region_name="${aws_region//-/_}"
+#     if aws pricing get-products --filters \
+#         Type=TERM_MATCH,Field=ServiceCode,Value=AmazonEC2 \
+#         Type=TERM_MATCH,Field=InstanceType,Value=$ec2_instance_type \
+#         Type=TERM_MATCH,Field=operatingSystem,Value=Linux \
+#         Type=TERM_MATCH,Field=tenancy,Value=Shared \
+#         Type=TERM_MATCH,Field=capacitystatus,Value=Used \
+#         Type=TERM_MATCH,Field=preInstalledSw,Value=NA \
+#         "Type=TERM_MATCH,Field=location,Value=${region_names[$region_name]}" \
+#         --format-version aws_v1 --max-results 1 \
+#         --service-code AmazonEC2 --output json >$pricing_json; then
+#         price_in_usd="$(jq -r '.PriceList[] | fromjson.terms.OnDemand[].priceDimensions[].pricePerUnit.USD' $pricing_json || echo "")"
+#         total_duration="$(jq -r '.total_duration' $results_dir/test-duration.json || echo "")"
+#         total_hours="$(bc <<<"scale=4;hrs=$total_duration/60;scale=0;if (hrs % 60) hrs/60+1 else hrs/60" || echo "")"
+#     fi
+#     if [[ -n $price_in_usd ]] && [[ -n $total_hours ]]; then
+#         cost="$(bc <<<"scale=4;$count*$price_in_usd*$total_hours" | awk '{printf "%.4f\n", $0}')"
+#         total_cost="$(bc <<<"$total_cost+$cost" | awk '{printf "%.4f\n", $0}' || echo "0")"
+#         printf "Cost to run %s instance(s) from instance type %10s is USD %s.\n" "$count" "$ec2_instance_type" "$cost"
+#     else
+#         printf "WARNING: Could not calculate the cost to run %10s instance(s) from instance type %s.\n" "$count" "$ec2_instance_type"
+#     fi
+# done < <(jq -r '. as $type | keys_unsorted[] | select(endswith("ec2_instance_type")) | $type[.]' $results_dir/cf-test-metadata.json | sort | uniq -c | sort -nr)
+# if [[ $(bc <<<"scale=4;$total_cost > 0") -eq 1 ]]; then
+#     printf "\nTotal cost is USD %s.\n\n" "$total_cost"
+# fi
 
 declare -a performance_test_options
 
