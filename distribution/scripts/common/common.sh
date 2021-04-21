@@ -108,6 +108,10 @@ function write_sar_reports() {
     local server="$2"
     local sa_file="$3"
     local sa_yesterday_file="$4"
+    echo "metrics_location : $metrics_location"
+    echo "server : $server"
+    echo "sa_file : $sa_file"
+    echo "sa_yesterday_file : $sa_yesterday_file"
     if [[ ! -f $sa_file ]]; then
         echo "SAR file not found!" >&2
         return 1
@@ -121,6 +125,7 @@ function write_sar_reports() {
     local sar_args=""
     sar_args+=" -s $sar_start_time"
     sar_args+=" -e $sar_end_time"
+    echo "sar_args : $sar_args"
     local file_prefix="${metrics_location}/${server}_sar_report"
 
     local sar_block_device_args=""
@@ -137,6 +142,10 @@ function write_sar_reports() {
         sar_network_device_args="--iface=$network_device"
     fi
 
+    echo "Creating ${file_prefix}_all.csv"
+    sadf $sar_args -d -U $sa_file
+    echo "test"
+    
     sadf $sar_args -d -U $sa_file -- -A >${file_prefix}_all.csv
     sadf $sar_args -d -h -U $sa_file -- -A >${file_prefix}_all_h.csv
     sadf $sar_args -g $sa_file -- -A >${file_prefix}_all.svg
