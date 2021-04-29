@@ -143,48 +143,48 @@ function write_sar_reports() {
     fi
 
     echo "Creating ${file_prefix}_all.csv"
-    sadf $sar_args -d -U $sa_file
+    # sadf $sar_args -d -U $sa_file
     echo "test"
     
-    sadf $sar_args -d -U $sa_file -- -A >${file_prefix}_all.csv
-    sadf $sar_args -d -h -U $sa_file -- -A >${file_prefix}_all_h.csv
-    sadf $sar_args -g $sa_file -- -A >${file_prefix}_all.svg
-    sar $sar_args -A >${file_prefix}_all.txt
-    sar $sar_args -q >${file_prefix}_loadavg.txt
-    sar $sar_args -u >${file_prefix}_cpu.txt
-    sar $sar_args -r >${file_prefix}_memory.txt
-    sar $sar_args -d -p >${file_prefix}_disk.txt
-    sar $sar_args -b >${file_prefix}_io.txt
-    sar $sar_args -w >${file_prefix}_task.txt
-    sar $sar_args -v >${file_prefix}_file.txt
-    sar $sar_args -n DEV >${file_prefix}_network.txt
+    # sadf $sar_args -d -U $sa_file -- -A >${file_prefix}_all.csv
+    # sadf $sar_args -d -h -U $sa_file -- -A >${file_prefix}_all_h.csv
+    # sadf $sar_args -g $sa_file -- -A >${file_prefix}_all.svg
+    # sar $sar_args -A >${file_prefix}_all.txt
+    # sar $sar_args -q >${file_prefix}_loadavg.txt
+    # sar $sar_args -u >${file_prefix}_cpu.txt
+    # sar $sar_args -r >${file_prefix}_memory.txt
+    # sar $sar_args -d -p >${file_prefix}_disk.txt
+    # sar $sar_args -b >${file_prefix}_io.txt
+    # sar $sar_args -w >${file_prefix}_task.txt
+    # sar $sar_args -v >${file_prefix}_file.txt
+    # sar $sar_args -n DEV >${file_prefix}_network.txt
 
-    # Write CSVs
-    for sa in $sa_yesterday_file $sa_file; do
-        if [[ ! -f $sa ]]; then
-            continue
-        fi
-        sadf -U -d $sa -- -q | write_sar_csv_report ${file_prefix}_loadavg.csv
-        sadf -U -d $sa -- -u | write_sar_csv_report ${file_prefix}_cpu.csv
-        sadf -U -d $sa -- -r | write_sar_csv_report ${file_prefix}_memory.csv
-        sadf -U -d $sa $sar_block_device_args -- -d -p | write_sar_csv_report ${file_prefix}_disk.csv
-        sadf -U -d $sa -- -b | write_sar_csv_report ${file_prefix}_io.csv
-        sadf -U -d $sa -- -w | write_sar_csv_report ${file_prefix}_task.csv
-        sadf -U -d $sa -- -v | write_sar_csv_report ${file_prefix}_file.csv
-        sadf -U -d $sa $sar_network_device_args -- -n DEV | write_sar_csv_report ${file_prefix}_network.csv
-    done
+    # # Write CSVs
+    # for sa in $sa_yesterday_file $sa_file; do
+    #     if [[ ! -f $sa ]]; then
+    #         continue
+    #     fi
+    #     sadf -U -d $sa -- -q | write_sar_csv_report ${file_prefix}_loadavg.csv
+    #     sadf -U -d $sa -- -u | write_sar_csv_report ${file_prefix}_cpu.csv
+    #     sadf -U -d $sa -- -r | write_sar_csv_report ${file_prefix}_memory.csv
+    #     sadf -U -d $sa $sar_block_device_args -- -d -p | write_sar_csv_report ${file_prefix}_disk.csv
+    #     sadf -U -d $sa -- -b | write_sar_csv_report ${file_prefix}_io.csv
+    #     sadf -U -d $sa -- -w | write_sar_csv_report ${file_prefix}_task.csv
+    #     sadf -U -d $sa -- -v | write_sar_csv_report ${file_prefix}_file.csv
+    #     sadf -U -d $sa $sar_network_device_args -- -n DEV | write_sar_csv_report ${file_prefix}_network.csv
+    # done
 }
 
-# Write SAR report
-function write_sar_csv_report() {
-    if [[ -f $1 ]]; then
-        echo "Appending to sar csv report: $1"
-        sed -e '/RESTART/d' -e '/# /d' >>$1
-    else
-        echo "Creating sar csv report: $1"
-        sed -e '/RESTART/d' -e 's/# //' >$1
-    fi
-}
+# # Write SAR report
+# function write_sar_csv_report() {
+#     if [[ -f $1 ]]; then
+#         echo "Appending to sar csv report: $1"
+#         sed -e '/RESTART/d' -e '/# /d' >>$1
+#     else
+#         echo "Creating sar csv report: $1"
+#         sed -e '/RESTART/d' -e 's/# //' >$1
+#     fi
+# }
 
 function write_server_metrics() {
     if [[ -z $report_location ]]; then
